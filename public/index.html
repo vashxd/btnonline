@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="description" content="Jogo de Batalha Naval multiplayer online em tempo real">
+    <meta name="keywords" content="batalha naval, jogo online, multiplayer, battleship">
+    <title>⚓ Batalha Naval Online</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Batalha Naval">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="css/styles.css" as="style">
+    <link rel="preload" href="/socket.io/socket.io.js" as="script">
+    
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Tela de Início -->
+    <div id="start-screen" class="screen active">
+        <div class="container">
+            <div class="logo-container">
+                <h1 class="game-title">⚓ BATALHA NAVAL</h1>
+                <p class="game-subtitle">Multiplayer Online</p>
+            </div>
+              <div class="start-form">
+                <input type="text" id="player-name" placeholder="Digite seu nome" maxlength="20" autocomplete="off" aria-label="Nome do jogador">
+                <button id="ready-btn" class="btn btn-primary" aria-label="Entrar na fila para jogar">
+                    <span class="btn-text">PRONTO PARA JOGAR</span>
+                    <span class="btn-icon">🚢</span>
+                </button>
+            </div>
+            
+            <div class="game-info">
+                <h3>Como Jogar:</h3>
+                <ul>
+                    <li>📱 Posicione seus navios no tabuleiro</li>
+                    <li>🎯 Ataque o tabuleiro inimigo</li>
+                    <li>🏆 Afunde todos os navios para vencer!</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela de Aguardando -->
+    <div id="waiting-screen" class="screen">
+        <div class="container">
+            <div class="waiting-content">
+                <div class="loading-spinner"></div>
+                <h2>Procurando Oponente...</h2>
+                <p>Aguarde enquanto encontramos outro jogador</p>
+                <button id="cancel-waiting" class="btn btn-secondary">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela do Jogo -->
+    <div id="game-screen" class="screen">
+        <div class="game-header">
+            <div class="player-info">
+                <span id="player-name-display"></span>
+                <span class="vs">VS</span>
+                <span id="opponent-name-display"></span>
+            </div>
+            <div id="game-status" class="game-status"></div>
+            <div id="turn-indicator" class="turn-indicator"></div>
+        </div>
+
+        <div class="game-container">
+            <!-- Fase de Posicionamento -->
+            <div id="placement-phase" class="phase-container">
+                <div class="phase-header">
+                    <h2>Posicione seus Navios</h2>
+                    <div class="ships-to-place">
+                        <div class="ship-info">
+                            <span>Navios Restantes:</span>
+                            <div id="ships-remaining"></div>
+                        </div>                        <button id="rotate-ship" class="btn btn-small" aria-label="Girar orientação do navio" title="Alterar orientação: horizontal/vertical">Girar 🔄</button>
+                        <button id="auto-place" class="btn btn-small" aria-label="Posicionar navios automaticamente" title="Posicionamento automático de todos os navios">Auto 🎲</button>
+                    </div>
+                </div>
+                <div class="board-container">
+                    <div id="placement-board" class="board placement-board"></div>
+                </div>
+                <button id="confirm-placement" class="btn btn-primary" disabled>Confirmar Posicionamento</button>
+            </div>
+
+            <!-- Fase de Batalha -->
+            <div id="battle-phase" class="phase-container hidden">
+                <div class="boards-container">
+                    <div class="board-section">
+                        <h3>Seu Tabuleiro</h3>
+                        <div id="player-board" class="board player-board"></div>
+                    </div>
+                    <div class="board-section">
+                        <h3>Tabuleiro Inimigo</h3>
+                        <div id="enemy-board" class="board enemy-board"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela de Fim de Jogo -->
+    <div id="game-over-screen" class="screen">
+        <div class="container">
+            <div class="game-over-content">
+                <div id="result-icon" class="result-icon"></div>
+                <h2 id="game-result"></h2>
+                <p id="game-result-text"></p>
+                <button id="play-again" class="btn btn-primary">Jogar Novamente</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Desconexão -->
+    <div id="disconnect-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>⚠️ Oponente Desconectado</h3>
+            <p>Seu oponente saiu da partida</p>
+            <button id="disconnect-ok" class="btn btn-primary">OK</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/board.js"></script>
+    <script src="js/ships.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
