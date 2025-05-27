@@ -17,13 +17,12 @@ class BattleshipApp {
         this.maxReconnectAttempts = 5;
         
         this.init();
-    }
-
-    init() {
+    }    init() {
         this.setupEventListeners();
         this.setupSocketListeners();
         this.showScreen('start');
         this.createConnectionStatusIndicator();
+        this.initMobile();
     }
 
     setupEventListeners() {
@@ -148,26 +147,169 @@ class BattleshipApp {
         document.body.appendChild(indicator);
     }
 
+    initMobile() {
+        // Detectar dispositivos touch
+        this.isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        
+        // Adicionar feedback háptico se disponível
+        if (this.isTouchDevice && navigator.vibrate) {
+            this.hapticFeedbackEnabled = true;
+        }
+        
+        // Monitorar mudanças de orientação
+        this.setupOrientationListener();
+        
+        // Detectar teclado virtual
+        this.setupVirtualKeyboardDetection();
+        
+        // Melhorar experiência de toque
+        this.setupTouchEnhancements();
+        
+        // Otimizar performance para mobile
+        this.setupMobileOptimizations();
+    }
+    
+    setupOrientationListener() {
+        const handleOrientationChange = () => {
+            // Dar um tempo para a UI se ajustar
+            setTimeout(() => {
+                this.handleOrientationChange();
+            }, 300);
+        };
+        
+        // Listener para mudança de orientação
+        window.addEventListener('orientationchange', handleOrientationChange);
+        window.addEventListener('resize', handleOrientationChange);
+    }
+    
+    handleOrientationChange() {
+        const gameContainer = document.querySelector('.game-container');
+        if (gameContainer && this.gameState.phase === 'battle') {
+            // Força recálculo do layout dos tabuleiros
+            gameContainer.style.display = 'none';
+            gameContainer.offsetHeight; // Trigger reflow
+            gameContainer.style.display = '';
+        }
+    }
+    
+    setupVirtualKeyboardDetection() {
+        const initialViewportHeight = window.innerHeight;
+        
+        window.addEventListener('resize', () => {
+            const currentViewportHeight = window.innerHeight;
+            const heightDifference = initialViewportHeight - currentViewportHeight;
+            
+            // Se a altura diminuiu significativamente, provavelmente o teclado está aberto
+            if (heightDifference > 150) {
+                document.body.classList.add('keyboard-visible');
+            } else {
+                document.body.classList.remove('keyboard-visible');
+            }
+        });
+    }
+    
+    setupTouchEnhancements() {
+        if (!this.isTouchDevice) return;
+        
+        // Adicionar feedback visual para todos os botões
+        document.addEventListener('touchstart', (e) => {
+            const button = e.target.closest('.btn');
+            if (button) {
+                button.classList.add('touch-active');
+                this.provideFeedback('light');
+            }
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            const button = e.target.closest('.btn');
+            if (button) {
+                setTimeout(() => {
+                    button.classList.remove('touch-active');
+                }, 150);
+            }
+        });
+        
+        // Melhorar feedback para células do tabuleiro
+        document.addEventListener('touchstart', (e) => {
+            const cell = e.target.closest('.board-cell');
+            if (cell && !cell.classList.contains('disabled')) {
+                cell.classList.add('touch-feedback');
+            }
+        });
+        
+        document.addEventListener('touchend', (e) => {
+            const cell = e.target.closest('.board-cell');
+            if (cell) {
+                setTimeout(() => {
+                    cell.classList.remove('touch-feedback');
+                }, 200);
+            }
+        });
+    }
+    
+    setupMobileOptimizations() {
+        // Throttle para eventos de toque em tabuleiros
+        this.touchThrottle = false;
+        
+        // Detectar se é um dispositivo de baixa performance
+        this.isLowPerformanceDevice = this.detectLowPerformanceDevice();
+        
+        if (this.isLowPerformanceDevice) {
+            // Reduzir animações para dispositivos mais lentos
+            document.documentElement.style.setProperty('--transition', 'all 0.15s ease');
+        }
+    }
+    
+    detectLowPerformanceDevice() {
+        // Heurística simples para detectar dispositivos de baixa performance
+        const ua = navigator.userAgent;
+        const isOldAndroid = /Android [1-4]/.test(ua);
+        const isOldIOS = /OS [1-9]_/.test(ua);
+        const hasLowRAM = navigator.deviceMemory && navigator.deviceMemory < 2;
+        
+        return isOldAndroid || isOldIOS || hasLowRAM;
+    }
+    
+    provideFeedback(type = 'light') {
+        if (!this.hapticFeedbackEnabled) return;
+        
+        switch (type) {
+            case 'light':
+                navigator.vibrate(10);
+                break;
+            case 'medium':
+                navigator.vibrate(20);
+                break;
+            case 'heavy':
+                navigator.vibrate([10, 10, 20]);
+                break;
+            case 'success':
+                navigator.vibrate([10, 5, 10]);
+                break;
+            case 'error':
+                navigator.vibrate([20, 10, 20, 10, 20]);
+                break;
+        }
+    }
+    
     updateConnectionStatus() {
         const indicator = document.getElementById('connection-status');
         if (!indicator) return;
-
+        
         indicator.className = `connection-status ${this.connectionStatus}`;
         
-        switch(this.connectionStatus) {
+        switch (this.connectionStatus) {
             case 'connected':
-                indicator.textContent = '🟢 Online';
-                setTimeout(() => {
-                    indicator.style.opacity = '0';
-                }, 2000);
+                indicator.textContent = '● Online';
+                indicator.style.background = 'var(--accent-color)';
                 break;
             case 'connecting':
-                indicator.textContent = '🟡 Conectando...';
-                indicator.style.opacity = '1';
+                indicator.textContent = '◐ Conectando...';
+                indicator.style.background = 'var(--warning-color)';
                 break;
             case 'disconnected':
-                indicator.textContent = '🔴 Desconectado';
-                indicator.style.opacity = '1';
+                indicator.textContent = '● Offline';
+                indicator.style.background = 'var(--danger-color)';
                 break;
         }
     }
@@ -248,9 +390,22 @@ class BattleshipApp {
 
         this.updateGameStatus('Aguardando oponente posicionar navios...');
         document.getElementById('confirm-placement').disabled = true;
-    }
-
-    handleAttackResult(data) {
+    }    handleAttackResult(data) {
+        // Feedback háptico baseado no resultado
+        if (data.attacker === this.gameState.playerId) {
+            // Meu ataque
+            if (data.hit) {
+                this.provideFeedback(data.sunk ? 'heavy' : 'medium');
+            } else {
+                this.provideFeedback('light');
+            }
+        } else {
+            // Ataque inimigo em mim
+            if (data.hit) {
+                this.provideFeedback('error');
+            }
+        }
+        
         // Atualizar tabuleiro inimigo se foi meu ataque
         if (data.attacker === this.gameState.playerId) {
             window.enemyBattleBoard.markAttack(data.x, data.y, data.hit, data.sunk);
@@ -265,11 +420,12 @@ class BattleshipApp {
 
         // Feedback sonoro
         this.playSound(data.hit ? 'hit' : 'miss');
-    }
-
-    handleGameOver(data) {
+    }    handleGameOver(data) {
         this.gameState.phase = 'finished';
         const isWinner = data.winner === this.gameState.playerId;
+        
+        // Feedback háptico para fim de jogo
+        this.provideFeedback(isWinner ? 'success' : 'error');
         
         setTimeout(() => {
             this.showGameOverScreen(isWinner, data.winnerName);

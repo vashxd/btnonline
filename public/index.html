@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<head>    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#1e3a8a">
     <meta name="description" content="Jogo de Batalha Naval multiplayer online em tempo real">
     <meta name="keywords" content="batalha naval, jogo online, multiplayer, battleship">
@@ -13,6 +12,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Batalha Naval">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">`
     
     <!-- Preload critical resources -->
     <link rel="preload" href="css/styles.css" as="style">
@@ -24,16 +25,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Status de Conexão -->
+    <div id="connection-status" class="connection-status connected">●</div>
+    
     <!-- Tela de Início -->
     <div id="start-screen" class="screen active">
         <div class="container">
             <div class="logo-container">
                 <h1 class="game-title">⚓ BATALHA NAVAL</h1>
                 <p class="game-subtitle">Multiplayer Online</p>
-            </div>
-              <div class="start-form">
-                <input type="text" id="player-name" placeholder="Digite seu nome" maxlength="20" autocomplete="off" aria-label="Nome do jogador">
-                <button id="ready-btn" class="btn btn-primary" aria-label="Entrar na fila para jogar">
+            </div>              <div class="start-form">
+                <input type="text" id="player-name" placeholder="Digite seu nome" maxlength="20" autocomplete="off" aria-label="Nome do jogador" inputmode="text">
+                <button id="ready-btn" class="btn btn-primary mobile-ripple" aria-label="Entrar na fila para jogar" type="button">
                     <span class="btn-text">PRONTO PARA JOGAR</span>
                     <span class="btn-icon">🚢</span>
                 </button>
@@ -57,7 +60,7 @@
                 <div class="loading-spinner"></div>
                 <h2>Procurando Oponente...</h2>
                 <p>Aguarde enquanto encontramos outro jogador</p>
-                <button id="cancel-waiting" class="btn btn-secondary">Cancelar</button>
+                <button id="cancel-waiting" class="btn btn-secondary mobile-ripple">Cancelar</button>
             </div>
         </div>
     </div>
@@ -83,14 +86,14 @@
                         <div class="ship-info">
                             <span>Navios Restantes:</span>
                             <div id="ships-remaining"></div>
-                        </div>                        <button id="rotate-ship" class="btn btn-small" aria-label="Girar orientação do navio" title="Alterar orientação: horizontal/vertical">Girar 🔄</button>
-                        <button id="auto-place" class="btn btn-small" aria-label="Posicionar navios automaticamente" title="Posicionamento automático de todos os navios">Auto 🎲</button>
+                        </div>                        <button id="rotate-ship" class="btn btn-small mobile-ripple" aria-label="Girar orientação do navio" title="Alterar orientação: horizontal/vertical">Girar 🔄</button>
+                        <button id="auto-place" class="btn btn-small mobile-ripple" aria-label="Posicionar navios automaticamente" title="Posicionamento automático de todos os navios">Auto 🎲</button>
                     </div>
                 </div>
                 <div class="board-container">
                     <div id="placement-board" class="board placement-board"></div>
                 </div>
-                <button id="confirm-placement" class="btn btn-primary" disabled>Confirmar Posicionamento</button>
+                <button id="confirm-placement" class="btn btn-primary mobile-ripple" disabled>Confirmar Posicionamento</button>
             </div>
 
             <!-- Fase de Batalha -->
@@ -116,7 +119,7 @@
                 <div id="result-icon" class="result-icon"></div>
                 <h2 id="game-result"></h2>
                 <p id="game-result-text"></p>
-                <button id="play-again" class="btn btn-primary">Jogar Novamente</button>
+                <button id="play-again" class="btn btn-primary mobile-ripple">Jogar Novamente</button>
             </div>
         </div>
     </div>
@@ -126,7 +129,7 @@
         <div class="modal-content">
             <h3>⚠️ Oponente Desconectado</h3>
             <p>Seu oponente saiu da partida</p>
-            <button id="disconnect-ok" class="btn btn-primary">OK</button>
+            <button id="disconnect-ok" class="btn btn-primary mobile-ripple">OK</button>
         </div>
     </div>
 
